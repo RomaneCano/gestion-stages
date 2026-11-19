@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: api-gestion-stages
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    autoDeploy: true

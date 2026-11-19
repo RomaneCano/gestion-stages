@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Suivi des stages</title>
+  <meta name="description" content="Gestion des stages des étudiants : interface web et API REST hébergée dans le cloud.">
+  <meta name="theme-color" content="#5B5BD6">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%235B5BD6'/%3E%3Cpath d='M16 8 6 13l10 5 10-5-10-5Zm-6 9v4c0 1.7 2.7 3 6 3s6-1.3 6-3v-4l-6 3-6-3Z' fill='white'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <a class="skip" href="#main">Aller au contenu</a>
+
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Suivi des stages, accueil">
+      <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9"/><path d="M16 8 6 13l10 5 10-5-10-5Zm-6 9v4c0 1.7 2.7 3 6 3s6-1.3 6-3v-4l-6 3-6-3Z"/></svg>
+      <span class="brand-text">Suivi des stages<small>École d'ingénieurs</small></span>
+    </a>
+
+    <nav class="tabs" role="tablist" aria-label="Sections">
+      <button class="tab" role="tab" id="tab-stages" data-view="stages" aria-selected="true" aria-controls="view-stages">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Stages
+      </button>
+      <button class="tab" role="tab" id="tab-api" data-view="api" aria-selected="false" aria-controls="view-api">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a5 5 0 1 1 .9-9.9A6 6 0 0 1 19.5 10a4 4 0 0 1-.5 8H7Z"/></svg>API &amp; Cloud
+      </button>
+    </nav>
+
+    <div class="top-actions">
+      <span class="pill pill-wait" id="api-pill" role="status" aria-live="polite"><i class="dot"></i><span>Connexion…</span></span>
+      <button class="icon-btn" id="btn-help" title="Relancer la visite guidée" aria-label="Relancer la visite guidée">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.6 2.2c-.7.4-1.1 1-1.1 1.8M12 17h.01"/></svg>
+      </button>
+      <button class="icon-btn" id="btn-theme" title="Changer de thème" aria-label="Changer de thème">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div id="banner" class="banner" hidden role="status"></div>
+
+  <main id="main">
+
+    <section id="view-stages" aria-labelledby="t-stages">
+      <div class="hero">
+        <div class="hero-text">
+          <h1 id="t-stages">Les stages de vos étudiants, <span>en un coup d'œil</span></h1>
+          <p>Ajoutez, suivez et retrouvez chaque stage. Les données sont enregistrées via l'API REST hébergée dans le cloud.</p>
+        </div>
+        <button class="btn btn-light" id="btn-new">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Nouveau stage
+        </button>
+      </div>
+
+      <div class="stats" id="stats" aria-label="Statistiques"></div>
+
+      <div class="toolbar" id="toolbar">
+        <label class="search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input type="search" id="q" placeholder="Rechercher un stage…" aria-label="Rechercher un stage" autocomplete="off">
+        </label>
+        <div class="segmented" id="filters" role="group" aria-label="Filtrer par statut"></div>
+        <label class="select">
+          <span class="sr">Trier par</span>
+          <select id="sort">
+            <option value="-date_debut">Début : plus récent</option>
+            <option value="date_debut">Début : plus ancien</option>
+            <option value="date_fin">Fin : la plus proche</option>
+            <option value="nom_etudiant">Étudiant : A → Z</option>
+            <option value="entreprise">Entreprise : A → Z</option>
+          </select>
+        </label>
+      </div>
+
+      <div id="list-area" aria-live="polite"></div>
+    </section>
+
+    <section id="view-api" hidden aria-labelledby="t-api">
+      <div class="hero hero-api">
+        <div class="hero-text">
+          <h1 id="t-api">Une API REST, <span>déployée dans le cloud</span></h1>
+          <p>Tout ce que fait cette page passe par l'API ci-dessous. Vous pouvez l'appeler depuis Swagger, Postman ou <code>curl</code>.</p>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <article class="card" id="api-links">
+          <h2>Votre API</h2>
+          <p class="muted">Adresse de base à utiliser dans Postman ou dans vos scripts :</p>
+          <div class="copy-line"><code id="base-url"></code><button class="btn btn-ghost btn-sm" data-copy="#base-url">Copier</button></div>
+          <div class="link-grid">
+            <a class="link-card" href="/docs" target="_blank" rel="noopener"><b>Swagger UI</b><span>Tester chaque endpoint en ligne</span></a>
+            <a class="link-card" href="/redoc" target="_blank" rel="noopener"><b>ReDoc</b><span>Documentation de référence</span></a>
+            <a class="link-card" href="/openapi.json" target="_blank" rel="noopener"><b>OpenAPI (JSON)</b><span>Spécification à importer dans Postman</span></a>
+            <a class="link-card" href="/health" target="_blank" rel="noopener"><b>/health</b><span>État du service (supervision)</span></a>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Architecture</h2>
+          <p class="muted">Du navigateur à la base de données :</p>
+          <svg class="archi" viewBox="0 0 460 250" role="img" aria-label="Schéma : le navigateur appelle en HTTPS l'API FastAPI dans un conteneur Docker sur Render, qui lit et écrit une base SQLite. GitHub déclenche le déploiement.">
+            <defs><marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" class="arrow-head"/></marker></defs>
+            <rect x="2" y="70" width="104" height="62" rx="12" class="a-box"/><text x="54" y="98" class="a-t">Navigateur</text><text x="54" y="116" class="a-s">Postman · curl</text>
+            <rect x="150" y="6" width="306" height="238" rx="18" class="a-cloud"/><text x="166" y="28" class="a-label">Render · PaaS (cloud public)</text>
+            <rect x="170" y="44" width="266" height="184" rx="14" class="a-docker"/><text x="184" y="64" class="a-label">Conteneur Docker</text>
+            <rect x="190" y="78" width="226" height="52" rx="10" class="a-api"/><text x="303" y="101" class="a-t a-w">API FastAPI</text><text x="303" y="118" class="a-s a-w">/stages · /docs · /health</text>
+            <rect x="190" y="162" width="226" height="48" rx="10" class="a-db"/><text x="303" y="190" class="a-t">SQLite (stages.db)</text>
+            <path d="M303 130v30" class="a-line" marker-end="url(#arr)"/>
+            <path d="M108 101h80" class="a-line" marker-end="url(#arr)"/><text x="148" y="90" class="a-s">HTTPS · JSON</text>
+            <rect x="2" y="170" width="104" height="52" rx="12" class="a-box"/><text x="54" y="194" class="a-t">GitHub</text><text x="54" y="210" class="a-s">push → déploie</text>
+            <path d="M108 196h80" class="a-line a-dash" marker-end="url(#arr)"/>
+          </svg>
+        </article>
+      </div>
+
+      <article class="card">
+        <h2>Endpoints</h2>
+        <p class="muted">Une ressource <code>/stages</code> avec une URI unique par stage. Cliquez sur « curl » pour copier la commande.</p>
+        <div class="endpoints" id="endpoints"></div>
+      </article>
+
+      <article class="card">
+        <h2>Notions du cours mises en œuvre</h2>
+        <div class="notions" id="notions"></div>
+      </article>
+
+      <article class="callout">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+        <div>
+          <b>À savoir avant de présenter</b>
+          <ul>
+            <li>Sur l'offre gratuite de Render, le service <b>se met en veille</b> après ~15 min d'inactivité : le premier appel peut prendre jusqu'à une minute.</li>
+            <li>La base SQLite est stockée dans le conteneur : les données peuvent être <b>perdues à chaque redémarrage ou redéploiement</b>. Utilisez « Charger des exemples » pour repartir.</li>
+            <li>Projet pédagogique : <b>aucune donnée personnelle réelle</b>, uniquement des noms fictifs.</li>
+          </ul>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <footer class="footer">
+    Projet pédagogique · Cloud Computing, Microservices &amp; API · Données fictives, susceptibles d'être réinitialisées.
+  </footer>
+
+  <dialog id="dlg-form" aria-labelledby="form-title">
+    <form id="form" novalidate>
+      <header class="dlg-head">
+        <h2 id="form-title">Nouveau stage</h2>
+        <button type="button" class="icon-btn" data-close aria-label="Fermer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      </header>
+      <div class="fields">
+        <div class="field">
+          <label for="f-nom">Nom de l'étudiant</label>
+          <input id="f-nom" name="nom_etudiant" maxlength="150" autocomplete="off" placeholder="Ex. Camille Durand" required>
+          <small class="hint">Utilisez un nom fictif : aucune donnée personnelle réelle.</small>
+          <small class="err" data-err="nom_etudiant"></small>
+        </div>
+        <div class="field">
+          <label for="f-ent">Entreprise d'accueil</label>
+          <input id="f-ent" name="entreprise" maxlength="150" list="entreprises" autocomplete="off" placeholder="Ex. Altéa Systems" required>
+          <datalist id="entreprises"></datalist>
+          <small class="err" data-err="entreprise"></small>
+        </div>
+        <div class="field">
+          <label for="f-int">Intitulé du stage</label>
+          <input id="f-int" name="intitule" maxlength="150" autocomplete="off" placeholder="Ex. Développeur API REST" required>
+          <small class="err" data-err="intitule"></small>
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label for="f-deb">Date de début</label>
+            <input id="f-deb" name="date_debut" type="date" required>
+            <small class="err" data-err="date_debut"></small>
+          </div>
+          <div class="field">
+            <label for="f-fin">Date de fin</label>
+            <input id="f-fin" name="date_fin" type="date" required>
+            <small class="err" data-err="date_fin"></small>
+          </div>
+        </div>
+        <div class="chips" aria-label="Durées rapides">
+          <span>Durée rapide :</span>
+          <button type="button" class="chip" data-months="2">2 mois</button>
+          <button type="button" class="chip" data-months="4">4 mois</button>
+          <button type="button" class="chip" data-months="6">6 mois</button>
+        </div>
+        <p class="form-error" id="form-error" role="alert" hidden></p>
+      </div>
+      <footer class="dlg-foot">
+        <button type="button" class="btn btn-ghost" data-close>Annuler</button>
+        <button type="submit" class="btn btn-primary" id="btn-save">Enregistrer</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="dlg-confirm" aria-labelledby="confirm-title">
+    <div class="confirm">
+      <div class="confirm-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v5M14 11v5"/></svg></div>
+      <h2 id="confirm-title">Supprimer ce stage ?</h2>
+      <p id="confirm-text" class="muted"></p>
+      <div class="dlg-foot">
+        <button type="button" class="btn btn-ghost" data-close>Annuler</button>
+        <button type="button" class="btn btn-danger" id="btn-confirm">Supprimer</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div id="tour" hidden>
+    <div class="tour-hole" id="tour-hole"></div>
+    <div class="tour-pop" id="tour-pop" role="dialog" aria-modal="true" aria-labelledby="tour-title" aria-describedby="tour-body">
+      <div class="tour-step" id="tour-count"></div>
+      <h3 id="tour-title"></h3>
+      <p id="tour-body"></p>
+      <div class="tour-dots" id="tour-dots" aria-hidden="true"></div>
+      <div class="tour-actions">
+        <button class="btn btn-text" id="tour-skip">Passer</button>
+        <span class="spacer"></span>
+        <button class="btn btn-ghost" id="tour-prev">Précédent</button>
+        <button class="btn btn-primary" id="tour-next">Suivant</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
