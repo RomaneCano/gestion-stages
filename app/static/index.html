@@ -3,27 +3,33 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Suivi des stages</title>
-  <meta name="description" content="Gestion des stages des étudiants : interface web et API REST hébergée dans le cloud.">
-  <meta name="theme-color" content="#5B5BD6">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%235B5BD6'/%3E%3Cpath d='M16 8 6 13l10 5 10-5-10-5Zm-6 9v4c0 1.7 2.7 3 6 3s6-1.3 6-3v-4l-6 3-6-3Z' fill='white'/%3E%3C/svg%3E">
+  <title>ISIS · Suivi des stages</title>
+  <meta name="description" content="Suivi des stages des étudiants de l'école d'ingénieurs ISIS : interface web et API REST hébergée dans le cloud.">
+  <meta name="theme-color" content="#5a35e0">
+  <link rel="icon" type="image/png" href="/static/favicon.png">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
   <a class="skip" href="#main">Aller au contenu</a>
 
   <header class="topbar">
-    <a class="brand" href="/" aria-label="Suivi des stages, accueil">
-      <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9"/><path d="M16 8 6 13l10 5 10-5-10-5Zm-6 9v4c0 1.7 2.7 3 6 3s6-1.3 6-3v-4l-6 3-6-3Z"/></svg>
-      <span class="brand-text">Suivi des stages<small>École d'ingénieurs</small></span>
+    <a class="brand" href="/" aria-label="ISIS, suivi des stages, accueil">
+      <img class="logo" src="/static/logo.png" alt="" width="40" height="40">
+      <span class="brand-text">Suivi des stages<small>École d'ingénieurs ISIS</small></span>
     </a>
 
     <nav class="tabs" role="tablist" aria-label="Sections">
       <button class="tab" role="tab" id="tab-stages" data-view="stages" aria-selected="true" aria-controls="view-stages">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Stages
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span>Stages</span>
+      </button>
+      <button class="tab" role="tab" id="tab-planning" data-view="planning" aria-selected="false" aria-controls="view-planning">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h10M3 12h16M3 19h8M13 5h2M19 12h2M11 19h6"/></svg><span>Planning</span>
+      </button>
+      <button class="tab" role="tab" id="tab-stats" data-view="stats" aria-selected="false" aria-controls="view-stats">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Statistiques</span>
       </button>
       <button class="tab" role="tab" id="tab-api" data-view="api" aria-selected="false" aria-controls="view-api">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a5 5 0 1 1 .9-9.9A6 6 0 0 1 19.5 10a4 4 0 0 1-.5 8H7Z"/></svg>API &amp; Cloud
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a5 5 0 1 1 .9-9.9A6 6 0 0 1 19.5 10a4 4 0 0 1-.5 8H7Z"/></svg><span>API &amp; Cloud</span>
       </button>
     </nav>
 
@@ -41,44 +47,82 @@
   <div id="banner" class="banner" hidden role="status"></div>
 
   <main id="main">
-
     <section id="view-stages" aria-labelledby="t-stages">
       <div class="hero">
         <div class="hero-text">
+          <span class="eyebrow">École d'ingénieurs ISIS</span>
           <h1 id="t-stages">Les stages de vos étudiants, <span>en un coup d'œil</span></h1>
-          <p>Ajoutez, suivez et retrouvez chaque stage. Les données sont enregistrées via l'API REST hébergée dans le cloud.</p>
+          <p>Ajoutez, suivez et retrouvez chaque stage : conventions, rapports, notes et échéances. Tout est enregistré via l'API REST hébergée dans le cloud.</p>
         </div>
-        <button class="btn btn-light" id="btn-new">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Nouveau stage
-        </button>
+        <div class="hero-actions">
+          <button class="btn btn-light" id="btn-new">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Nouveau stage
+          </button>
+          <button class="btn btn-glass" id="btn-export" title="Télécharger la sélection au format CSV (Excel)">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v3h16v-3"/></svg>Exporter en CSV
+          </button>
+        </div>
       </div>
 
       <div class="stats" id="stats" aria-label="Statistiques"></div>
+      <section id="alerts" class="alerts" hidden aria-label="À surveiller"></section>
 
       <div class="toolbar" id="toolbar">
         <label class="search">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-          <input type="search" id="q" placeholder="Rechercher un stage…" aria-label="Rechercher un stage" autocomplete="off">
+          <input type="search" id="q" placeholder="Rechercher un stage…  ( / )" aria-label="Rechercher un stage" autocomplete="off">
         </label>
         <div class="segmented" id="filters" role="group" aria-label="Filtrer par statut"></div>
-        <label class="select">
-          <span class="sr">Trier par</span>
-          <select id="sort">
-            <option value="-date_debut">Début : plus récent</option>
-            <option value="date_debut">Début : plus ancien</option>
-            <option value="date_fin">Fin : la plus proche</option>
-            <option value="nom_etudiant">Étudiant : A → Z</option>
-            <option value="entreprise">Entreprise : A → Z</option>
-          </select>
-        </label>
+        <div class="selects">
+          <label class="select"><span class="sr">Filière</span><select id="f-filiere"></select></label>
+          <label class="select"><span class="sr">Entreprise</span><select id="f-entreprise"></select></label>
+          <label class="select">
+            <span class="sr">Trier par</span>
+            <select id="sort">
+              <option value="-date_debut">Début : plus récent</option>
+              <option value="date_debut">Début : plus ancien</option>
+              <option value="date_fin">Fin : la plus proche</option>
+              <option value="nom_etudiant">Étudiant : A → Z</option>
+              <option value="entreprise">Entreprise : A → Z</option>
+            </select>
+          </label>
+        </div>
       </div>
 
       <div id="list-area" aria-live="polite"></div>
     </section>
 
+    <section id="view-planning" hidden aria-labelledby="t-planning">
+      <div class="page-head">
+        <div>
+          <h1 id="t-planning">Planning des stages</h1>
+          <p class="muted">Vue chronologique de tous les stages. Cliquez sur une barre pour ouvrir la fiche.</p>
+        </div>
+        <ul class="legend" aria-label="Légende">
+          <li><i class="sw lg-en_cours"></i>En cours</li>
+          <li><i class="sw lg-a_venir"></i>À venir</li>
+          <li><i class="sw lg-termine"></i>Terminé</li>
+          <li><i class="sw lg-today"></i>Aujourd'hui</li>
+        </ul>
+      </div>
+      <div id="gantt"></div>
+    </section>
+
+    <section id="view-stats" hidden aria-labelledby="t-stats">
+      <div class="page-head">
+        <div>
+          <h1 id="t-stats">Statistiques</h1>
+          <p class="muted">Indicateurs calculés par l'API (<code>GET /stats</code>) à partir des stages enregistrés.</p>
+        </div>
+      </div>
+      <div id="kpis" class="kpis"></div>
+      <div id="charts" class="charts"></div>
+    </section>
+
     <section id="view-api" hidden aria-labelledby="t-api">
       <div class="hero hero-api">
         <div class="hero-text">
+          <span class="eyebrow">Architecture &amp; documentation</span>
           <h1 id="t-api">Une API REST, <span>déployée dans le cloud</span></h1>
           <p>Tout ce que fait cette page passe par l'API ci-dessous. Vous pouvez l'appeler depuis Swagger, Postman ou <code>curl</code>.</p>
         </div>
@@ -105,10 +149,10 @@
             <rect x="2" y="70" width="104" height="62" rx="12" class="a-box"/><text x="54" y="98" class="a-t">Navigateur</text><text x="54" y="116" class="a-s">Postman · curl</text>
             <rect x="150" y="6" width="306" height="238" rx="18" class="a-cloud"/><text x="166" y="28" class="a-label">Render · PaaS (cloud public)</text>
             <rect x="170" y="44" width="266" height="184" rx="14" class="a-docker"/><text x="184" y="64" class="a-label">Conteneur Docker</text>
-            <rect x="190" y="78" width="226" height="52" rx="10" class="a-api"/><text x="303" y="101" class="a-t a-w">API FastAPI</text><text x="303" y="118" class="a-s a-w">/stages · /docs · /health</text>
+            <rect x="190" y="78" width="226" height="52" rx="10" class="a-api"/><text x="303" y="101" class="a-t a-w">API FastAPI</text><text x="303" y="118" class="a-s a-w">/stages · /stats · /alertes</text>
             <rect x="190" y="162" width="226" height="48" rx="10" class="a-db"/><text x="303" y="190" class="a-t">SQLite (stages.db)</text>
             <path d="M303 130v30" class="a-line" marker-end="url(#arr)"/>
-            <path d="M108 101h80" class="a-line" marker-end="url(#arr)"/><text x="148" y="90" class="a-s">HTTPS · JSON</text>
+            <path d="M108 101h80" class="a-line" marker-end="url(#arr)"/><text x="148" y="90" class="a-s">HTTPS</text><text x="148" y="120" class="a-s">JSON</text>
             <rect x="2" y="170" width="104" height="52" rx="12" class="a-box"/><text x="54" y="194" class="a-t">GitHub</text><text x="54" y="210" class="a-s">push → déploie</text>
             <path d="M108 196h80" class="a-line a-dash" marker-end="url(#arr)"/>
           </svg>
@@ -117,7 +161,7 @@
 
       <article class="card">
         <h2>Endpoints</h2>
-        <p class="muted">Une ressource <code>/stages</code> avec une URI unique par stage. Cliquez sur « curl » pour copier la commande.</p>
+        <p class="muted">Une ressource <code>/stages</code> avec une URI unique par stage, et des services d'analyse. Cliquez sur « curl » pour copier la commande.</p>
         <div class="endpoints" id="endpoints"></div>
       </article>
 
@@ -141,7 +185,7 @@
   </main>
 
   <footer class="footer">
-    Projet pédagogique · Cloud Computing, Microservices &amp; API · Données fictives, susceptibles d'être réinitialisées.
+    École d'ingénieurs ISIS · Projet pédagogique Cloud Computing, Microservices &amp; API · Données fictives, susceptibles d'être réinitialisées.
   </footer>
 
   <dialog id="dlg-form" aria-labelledby="form-title">
@@ -151,41 +195,87 @@
         <button type="button" class="icon-btn" data-close aria-label="Fermer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
       </header>
       <div class="fields">
-        <div class="field">
-          <label for="f-nom">Nom de l'étudiant</label>
-          <input id="f-nom" name="nom_etudiant" maxlength="150" autocomplete="off" placeholder="Ex. Camille Durand" required>
-          <small class="hint">Utilisez un nom fictif : aucune donnée personnelle réelle.</small>
-          <small class="err" data-err="nom_etudiant"></small>
-        </div>
-        <div class="field">
-          <label for="f-ent">Entreprise d'accueil</label>
-          <input id="f-ent" name="entreprise" maxlength="150" list="entreprises" autocomplete="off" placeholder="Ex. Altéa Systems" required>
-          <datalist id="entreprises"></datalist>
-          <small class="err" data-err="entreprise"></small>
-        </div>
-        <div class="field">
-          <label for="f-int">Intitulé du stage</label>
-          <input id="f-int" name="intitule" maxlength="150" autocomplete="off" placeholder="Ex. Développeur API REST" required>
-          <small class="err" data-err="intitule"></small>
-        </div>
-        <div class="row-2">
+        <fieldset class="group">
+          <legend>Le stage</legend>
           <div class="field">
-            <label for="f-deb">Date de début</label>
-            <input id="f-deb" name="date_debut" type="date" required>
-            <small class="err" data-err="date_debut"></small>
+            <label for="f-nom">Nom de l'étudiant</label>
+            <input id="f-nom" name="nom_etudiant" maxlength="150" autocomplete="off" placeholder="Ex. Camille Durand" required>
+            <small class="hint">Utilisez un nom fictif : aucune donnée personnelle réelle.</small>
+            <small class="err" data-err="nom_etudiant"></small>
+          </div>
+          <div class="row-2">
+            <div class="field">
+              <label for="f-ent">Entreprise d'accueil</label>
+              <input id="f-ent" name="entreprise" maxlength="150" list="entreprises" autocomplete="off" placeholder="Ex. Altéa Systems" required>
+              <datalist id="entreprises"></datalist>
+              <small class="err" data-err="entreprise"></small>
+            </div>
+            <div class="field">
+              <label for="f-ville">Ville</label>
+              <input id="f-ville" name="ville" maxlength="150" list="villes" autocomplete="off" placeholder="Ex. Toulouse">
+              <datalist id="villes"></datalist>
+            </div>
           </div>
           <div class="field">
-            <label for="f-fin">Date de fin</label>
-            <input id="f-fin" name="date_fin" type="date" required>
-            <small class="err" data-err="date_fin"></small>
+            <label for="f-int">Intitulé du stage</label>
+            <input id="f-int" name="intitule" maxlength="150" autocomplete="off" placeholder="Ex. Développeur API REST" required>
+            <small class="err" data-err="intitule"></small>
           </div>
-        </div>
-        <div class="chips" aria-label="Durées rapides">
-          <span>Durée rapide :</span>
-          <button type="button" class="chip" data-months="2">2 mois</button>
-          <button type="button" class="chip" data-months="4">4 mois</button>
-          <button type="button" class="chip" data-months="6">6 mois</button>
-        </div>
+          <div class="row-2">
+            <div class="field">
+              <label for="f-deb">Date de début</label>
+              <input id="f-deb" name="date_debut" type="date" required>
+              <small class="err" data-err="date_debut"></small>
+            </div>
+            <div class="field">
+              <label for="f-fin">Date de fin</label>
+              <input id="f-fin" name="date_fin" type="date" required>
+              <small class="err" data-err="date_fin"></small>
+            </div>
+          </div>
+          <div class="chips" aria-label="Durées rapides">
+            <span>Durée rapide :</span>
+            <button type="button" class="chip" data-months="2">2 mois</button>
+            <button type="button" class="chip" data-months="4">4 mois</button>
+            <button type="button" class="chip" data-months="6">6 mois</button>
+          </div>
+        </fieldset>
+
+        <fieldset class="group">
+          <legend>Encadrement <em>facultatif</em></legend>
+          <div class="field">
+            <label for="f-fil">Filière</label>
+            <input id="f-fil" name="filiere" maxlength="150" list="filieres" autocomplete="off" placeholder="Ex. Informatique">
+            <datalist id="filieres"></datalist>
+          </div>
+          <div class="row-2">
+            <div class="field">
+              <label for="f-tut">Tuteur à l'école</label>
+              <input id="f-tut" name="tuteur_ecole" maxlength="150" autocomplete="off" placeholder="Ex. Mme Lefèvre">
+            </div>
+            <div class="field">
+              <label for="f-mai">Maître de stage</label>
+              <input id="f-mai" name="maitre_stage" maxlength="150" autocomplete="off" placeholder="Ex. M. Garnier">
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="group">
+          <legend>Suivi <em>facultatif</em></legend>
+          <div class="row-2">
+            <label class="switch"><input type="checkbox" name="convention_signee"><span class="slider"></span><span>Convention signée</span></label>
+            <label class="switch"><input type="checkbox" name="rapport_remis"><span class="slider"></span><span>Rapport remis</span></label>
+          </div>
+          <div class="field narrow">
+            <label for="f-note">Note finale (sur 20)</label>
+            <input id="f-note" name="note" type="number" min="0" max="20" step="1" inputmode="numeric" placeholder="—">
+            <small class="err" data-err="note"></small>
+          </div>
+          <div class="field">
+            <label for="f-com">Commentaire</label>
+            <textarea id="f-com" name="commentaire" rows="3" maxlength="1000" placeholder="Remarques, points de vigilance, mission…"></textarea>
+          </div>
+        </fieldset>
         <p class="form-error" id="form-error" role="alert" hidden></p>
       </div>
       <footer class="dlg-foot">
@@ -193,6 +283,10 @@
         <button type="submit" class="btn btn-primary" id="btn-save">Enregistrer</button>
       </footer>
     </form>
+  </dialog>
+
+  <dialog id="dlg-detail" class="drawer" aria-label="Fiche du stage">
+    <div id="detail"></div>
   </dialog>
 
   <dialog id="dlg-confirm" aria-labelledby="confirm-title">
@@ -213,6 +307,7 @@
       <div class="tour-step" id="tour-count"></div>
       <h3 id="tour-title"></h3>
       <p id="tour-body"></p>
+      <button class="btn btn-ghost btn-sm tour-extra" id="tour-extra" hidden></button>
       <div class="tour-dots" id="tour-dots" aria-hidden="true"></div>
       <div class="tour-actions">
         <button class="btn btn-text" id="tour-skip">Passer</button>
